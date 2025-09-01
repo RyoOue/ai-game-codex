@@ -1,6 +1,7 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useGame } from '../../game/state'
 import type { MinigameScene, TriageTicket } from '../../types'
+import { trackMinigameStart, trackMinigameComplete } from '../../lib/analytics'
 
 type Priority = 'P1' | 'P2' | 'P3'
 const priorities: Priority[] = ['P1', 'P2', 'P3']
@@ -47,9 +48,14 @@ export function MinigameTriage({ scene }: { scene: MinigameScene }) {
     return { correct, total: scene.tickets.length }
   }, [assign, scene.tickets])
 
+  useEffect(() => {
+    trackMinigameStart(scene.id)
+  }, [scene.id])
+
   const submit = () => {
     const growth = Math.round((score.correct / score.total) * 20) // 0〜20
     const feedback = `優先度の判定: ${score.correct}/${score.total} 件正解（学習・成長 +${growth}）`
+    trackMinigameComplete(scene.id, score.correct, score.total)
     dispatch({ type: 'minigame_complete', next: scene.next, effect: { growth }, feedback })
   }
 

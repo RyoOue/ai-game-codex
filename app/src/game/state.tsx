@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useMemo, useReducer } from 'react'
 import type { GameAction, GameSpec, GameState, Meter, Meters, Scene } from '../types'
+import { trackChoice, trackGameComplete, trackGameStart, trackMeterUpdate, trackPage } from '../lib/analytics'
 
 const clamp = (v: number, min = 0, max = 100) => Math.max(min, Math.min(max, v))
 
@@ -35,12 +36,23 @@ function reducer(state: GameState, action: GameAction): GameState {
         for (const [k, delta] of Object.entries(choice.effect)) {
           const key = k as Meter
           const d = Number(delta ?? 0) || 0
-          nextMeters[key] = clamp((nextMeters[key] ?? 50) + d)
+          const newValue = clamp((nextMeters[key] ?? 50) + d)
+          trackMeterUpdate(key, d, newValue)
+          nextMeters[key] = newValue
         }
       }
 
       const nextScene = state.spec.scenes[choice.next]
       const status = nextScene?.type === 'result' ? 'completed' : state.status
+      // Track events
+      if (state.sceneId === state.spec.start) {
+        trackGameStart()
+      }
+      trackChoice(state.sceneId, { id: choice.id, label: choice.label, next: choice.next })
+      if (status === 'completed') {
+        const total = nextMeters.customer + nextMeters.team + nextMeters.growth
+        trackGameComplete(total)
+      }
 
       return {
         ...state,
@@ -57,11 +69,17 @@ function reducer(state: GameState, action: GameAction): GameState {
         for (const [k, delta] of Object.entries(action.effect)) {
           const key = k as Meter
           const d = Number(delta ?? 0) || 0
-          nextMeters[key] = clamp((nextMeters[key] ?? 50) + d)
+          const newValue = clamp((nextMeters[key] ?? 50) + d)
+          trackMeterUpdate(key, d, newValue)
+          nextMeters[key] = newValue
         }
       }
       const nextScene = state.spec.scenes[action.next]
       const status = nextScene?.type === 'result' ? 'completed' : state.status
+      if (status === 'completed') {
+        const total = nextMeters.customer + nextMeters.team + nextMeters.growth
+        trackGameComplete(total)
+      }
       return {
         ...state,
         meters: nextMeters,
@@ -112,6 +130,10 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   }, [state.spec, state.sceneId])
 
   const value = useMemo(() => ({ state, dispatch, scene }), [state, scene])
+  // Track page view on scene change
+  useEffect(() => {
+    if (state.sceneId) trackPage(String(state.sceneId))
+  }, [state.sceneId])
   return <GameContext.Provider value={value}>{children}</GameContext.Provider>
 }
 

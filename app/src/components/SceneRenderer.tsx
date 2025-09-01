@@ -1,6 +1,7 @@
 import { useGame } from '../game/state'
 import type { MinigameScene, TextScene as TTextScene, ChoicesScene as TChoicesScene } from '../types'
 import { MinigameTriage } from './minigame/MinigameTriage'
+import { trackCta } from '../lib/analytics'
 
 export function SceneRenderer() {
   const { state, dispatch, scene } = useGame()
@@ -69,7 +70,7 @@ function ResultScene() {
       <p style={{ color: '#444', lineHeight: 1.8 }}>骨組み版のため、メーターの合計を表示します。</p>
       <p style={{ marginTop: 8 }}>合計スコア: {total}</p>
       <div style={{ marginTop: 16 }}>
-        <a href="#" onClick={(e) => e.preventDefault()} style={{ textDecoration: 'none' }}>
+        <a href="#" onClick={(e) => { e.preventDefault(); trackCta('result'); }} style={{ textDecoration: 'none' }}>
           <button style={{ padding: '10px 16px' }}>説明会を予約する（ダミー）</button>
         </a>
       </div>
