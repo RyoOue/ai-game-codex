@@ -64,14 +64,24 @@ function ChoicesScene({ scene, onChoose, feedback }: { scene: TChoicesScene; onC
 function ResultScene() {
   const { state } = useGame()
   const total = state.meters.customer + state.meters.team + state.meters.growth
+  const params = new URLSearchParams({
+    score_total: String(total),
+    customer: String(state.meters.customer),
+    team: String(state.meters.team),
+    growth: String(state.meters.growth),
+    utm_source: 'game',
+    utm_medium: 'cta',
+    utm_campaign: 'ses_mvp',
+  })
+  const reserveHref = `reserve/?${params.toString()}`
   return (
     <section>
       <h2 style={{ marginBottom: 8 }}>結果</h2>
       <p style={{ color: '#444', lineHeight: 1.8 }}>骨組み版のため、メーターの合計を表示します。</p>
       <p style={{ marginTop: 8 }}>合計スコア: {total}</p>
       <div style={{ marginTop: 16 }}>
-        <a href="#" onClick={(e) => { e.preventDefault(); trackCta('result'); }} style={{ textDecoration: 'none' }}>
-          <button style={{ padding: '10px 16px' }}>説明会を予約する（ダミー）</button>
+        <a href={reserveHref} onClick={() => { trackCta('result') }} style={{ textDecoration: 'none' }}>
+          <button style={{ padding: '10px 16px' }}>説明会を予約する</button>
         </a>
       </div>
     </section>
