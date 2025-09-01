@@ -27,7 +27,8 @@ function reducer(state: GameState, action: GameAction): GameState {
     case 'choose': {
       if (!state.spec || !state.sceneId) return state
       const current: Scene | undefined = state.spec.scenes[state.sceneId]
-      if (!current || current.type !== 'choices') return state
+      // text シーンでも choices を許可（Onboarding の「始める」など）
+      if (!current || !('choices' in current) || !current.choices) return state
       const choice = current.choices.find((c) => c.id === action.choiceId)
       if (!choice) return state
 
