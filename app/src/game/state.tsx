@@ -26,7 +26,7 @@ function reducer(state: GameState, action: GameAction): GameState {
     case 'choose': {
       if (!state.spec || !state.sceneId) return state
       const current: Scene | undefined = state.spec.scenes[state.sceneId]
-      if (!current || !current.choices) return state
+      if (!current || current.type !== 'choices') return state
       const choice = current.choices.find((c) => c.id === action.choiceId)
       if (!choice) return state
 
@@ -34,7 +34,8 @@ function reducer(state: GameState, action: GameAction): GameState {
       if (choice.effect) {
         for (const [k, delta] of Object.entries(choice.effect)) {
           const key = k as Meter
-          nextMeters[key] = clamp((nextMeters[key] ?? 50) + (delta ?? 0))
+          const d = Number(delta ?? 0) || 0
+          nextMeters[key] = clamp((nextMeters[key] ?? 50) + d)
         }
       }
 
@@ -46,6 +47,26 @@ function reducer(state: GameState, action: GameAction): GameState {
         meters: nextMeters,
         lastFeedback: choice.feedback,
         sceneId: choice.next,
+        status,
+      }
+    }
+    case 'minigame_complete': {
+      if (!state.spec) return state
+      const nextMeters: Meters = { ...state.meters }
+      if (action.effect) {
+        for (const [k, delta] of Object.entries(action.effect)) {
+          const key = k as Meter
+          const d = Number(delta ?? 0) || 0
+          nextMeters[key] = clamp((nextMeters[key] ?? 50) + d)
+        }
+      }
+      const nextScene = state.spec.scenes[action.next]
+      const status = nextScene?.type === 'result' ? 'completed' : state.status
+      return {
+        ...state,
+        meters: nextMeters,
+        lastFeedback: action.feedback,
+        sceneId: action.next,
         status,
       }
     }
@@ -99,4 +120,3 @@ export function useGame() {
   if (!ctx) throw new Error('useGame must be used within GameProvider')
   return ctx
 }
-

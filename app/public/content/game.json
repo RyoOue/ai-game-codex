@@ -21,22 +21,36 @@
           "label": "顧客の目的と背景を聞く",
           "effect": { "customer": 10, "growth": 5 },
           "feedback": "背景と目的を理解すると、後の仕様ブレを防げます。",
-          "next": "result"
+          "next": "triage"
         },
         {
           "id": "c1-b",
           "label": "すぐに工数見積もりを出す",
           "effect": { "customer": 3, "growth": -2 },
           "feedback": "スピードは良いですが、前提不整合のリスクがあります。",
-          "next": "result"
+          "next": "triage"
         },
         {
           "id": "c1-c",
           "label": "仕様書が来るまで待つ",
           "effect": { "customer": -5 },
           "feedback": "待ちに徹すると前進が止まり、信頼を損ねる恐れ。",
-          "next": "result"
+          "next": "triage"
         }
+      ]
+    },
+    "triage": {
+      "id": "triage",
+      "type": "minigame",
+      "title": "Chapter 2: バグトリアージ",
+      "body": "5件のチケットの優先度（P1/P2/P3）を判断してください。ボタンを押すと優先度が切り替わります。",
+      "next": "result",
+      "tickets": [
+        { "id": "t1", "title": "本番で購入ボタンが反応しない", "hint": "全ユーザー影響/売上直結", "correct": "P1" },
+        { "id": "t2", "title": "開発環境での軽微なレイアウト崩れ", "hint": "限定環境/回避可", "correct": "P3" },
+        { "id": "t3", "title": "APIの応答が稀に3秒以上かかる", "hint": "ユーザー体験に影響", "correct": "P2" },
+        { "id": "t4", "title": "ログローテーションが設定値と異なる", "hint": "監視/運用に影響", "correct": "P2" },
+        { "id": "t5", "title": "管理画面の説明文の誤字", "hint": "機能影響なし", "correct": "P3" }
       ]
     },
     "result": {
@@ -47,4 +61,3 @@
     }
   }
 }
-

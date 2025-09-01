@@ -1,5 +1,6 @@
 import { useGame } from '../game/state'
-import type { Scene } from '../types'
+import type { MinigameScene, TextScene as TTextScene, ChoicesScene as TChoicesScene } from '../types'
+import { MinigameTriage } from './minigame/MinigameTriage'
 
 export function SceneRenderer() {
   const { state, dispatch, scene } = useGame()
@@ -13,9 +14,11 @@ export function SceneRenderer() {
 
   switch (scene.type) {
     case 'text':
-      return <TextScene scene={scene} onNext={(id) => dispatch({ type: 'choose', choiceId: id })} />
+      return <TextScene scene={scene as TTextScene} onNext={(id) => dispatch({ type: 'choose', choiceId: id })} />
     case 'choices':
-      return <ChoicesScene scene={scene} onChoose={(id) => dispatch({ type: 'choose', choiceId: id })} feedback={state.lastFeedback} />
+      return <ChoicesScene scene={scene as TChoicesScene} onChoose={(id) => dispatch({ type: 'choose', choiceId: id })} feedback={state.lastFeedback} />
+    case 'minigame':
+      return <MinigameTriage scene={scene as MinigameScene} />
     case 'result':
       return <ResultScene />
     default:
@@ -23,7 +26,7 @@ export function SceneRenderer() {
   }
 }
 
-function TextScene({ scene, onNext }: { scene: Scene; onNext: (id: string) => void }) {
+function TextScene({ scene, onNext }: { scene: TTextScene; onNext: (id: string) => void }) {
   const first = scene.choices?.[0]
   return (
     <section>
@@ -38,13 +41,13 @@ function TextScene({ scene, onNext }: { scene: Scene; onNext: (id: string) => vo
   )
 }
 
-function ChoicesScene({ scene, onChoose, feedback }: { scene: Scene; onChoose: (id: string) => void; feedback?: string }) {
+function ChoicesScene({ scene, onChoose, feedback }: { scene: TChoicesScene; onChoose: (id: string) => void; feedback?: string }) {
   return (
     <section>
       {scene.title && <h2 style={{ marginBottom: 8 }}>{scene.title}</h2>}
       {scene.body && <p style={{ color: '#444', lineHeight: 1.8 }}>{scene.body}</p>}
       <div style={{ display: 'grid', gap: 8, marginTop: 12 }}>
-        {scene.choices?.map((c) => (
+        {scene.choices?.map((c: TChoicesScene['choices'][number]) => (
           <button key={c.id} onClick={() => onChoose(c.id)} style={{ padding: '10px 16px', textAlign: 'left' }}>
             {c.label}
           </button>
@@ -73,4 +76,3 @@ function ResultScene() {
     </section>
   )
 }
-
