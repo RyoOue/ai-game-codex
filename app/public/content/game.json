@@ -1,0 +1,50 @@
+{
+  "start": "onboarding",
+  "scenes": {
+    "onboarding": {
+      "id": "onboarding",
+      "type": "text",
+      "title": "ようこそ！SES業界・職種理解ゲーム",
+      "body": "あなたはSESエンジニアとして新規案件に参画します。5〜10分で“現場の1日”を体験しましょう。選択に応じて3つのメーター（顧客満足/チームワーク/学習・成長）が変動します。",
+      "choices": [
+        { "id": "start", "label": "始める", "next": "c1" }
+      ]
+    },
+    "c1": {
+      "id": "c1",
+      "type": "choices",
+      "title": "Chapter 1: 要件すり合わせ",
+      "body": "キックオフで、まず何を確認しますか？",
+      "choices": [
+        {
+          "id": "c1-a",
+          "label": "顧客の目的と背景を聞く",
+          "effect": { "customer": 10, "growth": 5 },
+          "feedback": "背景と目的を理解すると、後の仕様ブレを防げます。",
+          "next": "result"
+        },
+        {
+          "id": "c1-b",
+          "label": "すぐに工数見積もりを出す",
+          "effect": { "customer": 3, "growth": -2 },
+          "feedback": "スピードは良いですが、前提不整合のリスクがあります。",
+          "next": "result"
+        },
+        {
+          "id": "c1-c",
+          "label": "仕様書が来るまで待つ",
+          "effect": { "customer": -5 },
+          "feedback": "待ちに徹すると前進が止まり、信頼を損ねる恐れ。",
+          "next": "result"
+        }
+      ]
+    },
+    "result": {
+      "id": "result",
+      "type": "result",
+      "title": "結果",
+      "body": "今回は骨組み版です。スコアとフィードバックの表示のみ行います。"
+    }
+  }
+}
+
