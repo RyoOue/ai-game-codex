@@ -110,7 +110,9 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     const load = async () => {
       dispatch({ type: 'load_start' })
       try {
-        const res = await fetch('/content/game.json', { cache: 'no-store' })
+        const base = import.meta.env.BASE_URL || '/'
+        const url = `${base}content/game.json`
+        const res = await fetch(url, { cache: 'no-store' })
         if (!res.ok) throw new Error(String(res.status))
         const spec = (await res.json()) as GameSpec
         if (!aborted) dispatch({ type: 'load_success', spec })

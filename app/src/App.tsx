@@ -23,9 +23,9 @@ function Shell() {
       <section style={{ marginTop: 24 }}>
         <h2 style={{ fontSize: 16, marginBottom: 8 }}>ドキュメント</h2>
         <ul style={{ lineHeight: 1.8 }}>
-          <li><a href="../requirements.md" target="_blank" rel="noreferrer">要件書（requirements.md）</a></li>
-          <li><a href="../design.md" target="_blank" rel="noreferrer">設計書（design.md）</a></li>
-          <li><a href="../task.md" target="_blank" rel="noreferrer">実装計画（task.md）</a></li>
+          <li><a href="https://github.com/RyoOue/ai-game-codex/blob/main/requirements.md" target="_blank" rel="noreferrer">要件書（requirements.md）</a></li>
+          <li><a href="https://github.com/RyoOue/ai-game-codex/blob/main/design.md" target="_blank" rel="noreferrer">設計書（design.md）</a></li>
+          <li><a href="https://github.com/RyoOue/ai-game-codex/blob/main/task.md" target="_blank" rel="noreferrer">実装計画（task.md）</a></li>
         </ul>
       </section>
     </main>
