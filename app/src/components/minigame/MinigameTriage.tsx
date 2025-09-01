@@ -19,6 +19,26 @@ export function MinigameTriage({ scene }: { scene: MinigameScene }) {
     })
   }
 
+  const onDropTo = (target: Priority | 'UNASSIGNED') => (e: React.DragEvent) => {
+    e.preventDefault()
+    const id = e.dataTransfer.getData('text/plain')
+    if (!id) return
+    setAssign((prev) => {
+      const next = { ...prev }
+      if (target === 'UNASSIGNED') {
+        delete next[id]
+      } else {
+        next[id] = target
+      }
+      return next
+    })
+  }
+
+  const onDragOver = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.dataTransfer.dropEffect = 'move'
+  }
+
   const score = useMemo(() => {
     let correct = 0
     for (const t of scene.tickets) {
@@ -38,9 +58,37 @@ export function MinigameTriage({ scene }: { scene: MinigameScene }) {
       {scene.title && <h2 style={{ marginBottom: 8 }}>{scene.title}</h2>}
       {scene.body && <p style={{ color: '#444', lineHeight: 1.8 }}>{scene.body}</p>}
 
-      <div style={{ display: 'grid', gap: 12, marginTop: 12 }}>
-        {scene.tickets.map((t) => (
-          <TicketItem key={t.id} ticket={t} value={assign[t.id]} onCycle={() => onCycle(t.id)} />
+      {/* DnDボード */}
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr 1fr 1fr',
+          gap: 12,
+          marginTop: 12,
+          alignItems: 'start',
+        }}
+      >
+        <DropColumn
+          title="未設定"
+          onDrop={onDropTo('UNASSIGNED')}
+          onDragOver={onDragOver}
+          hint="ドラッグでここに戻す"
+        >
+          {scene.tickets
+            .filter((t) => !assign[t.id])
+            .map((t) => (
+              <DraggableTicket key={t.id} ticket={t} value={assign[t.id]} onCycle={() => onCycle(t.id)} />
+            ))}
+        </DropColumn>
+
+        {(['P1', 'P2', 'P3'] as Priority[]).map((p) => (
+          <DropColumn key={p} title={p} onDrop={onDropTo(p)} onDragOver={onDragOver}>
+            {scene.tickets
+              .filter((t) => assign[t.id] === p)
+              .map((t) => (
+                <DraggableTicket key={t.id} ticket={t} value={assign[t.id]} onCycle={() => onCycle(t.id)} />
+              ))}
+          </DropColumn>
         ))}
       </div>
 
@@ -56,13 +104,22 @@ export function MinigameTriage({ scene }: { scene: MinigameScene }) {
   )
 }
 
-function TicketItem({ ticket, value, onCycle }: { ticket: TriageTicket; value?: Priority; onCycle: () => void }) {
+function DraggableTicket({ ticket, value, onCycle }: { ticket: TriageTicket; value?: Priority; onCycle: () => void }) {
+  const onDragStart = (e: React.DragEvent) => {
+    e.dataTransfer.setData('text/plain', ticket.id)
+    e.dataTransfer.effectAllowed = 'move'
+  }
   return (
-    <div style={{ border: '1px solid #ddd', borderRadius: 8, padding: 12 }}>
+    <div
+      draggable
+      onDragStart={onDragStart}
+      style={{ border: '1px solid #ddd', borderRadius: 8, padding: 12, background: '#fff' }}
+      aria-grabbed="true"
+    >
       <div style={{ fontWeight: 600 }}>{ticket.title}</div>
       {ticket.hint && <div style={{ color: '#666', fontSize: 14, marginTop: 4 }}>{ticket.hint}</div>}
-      <div style={{ marginTop: 8 }}>
-        <label style={{ fontSize: 12, color: '#555', marginRight: 8 }}>優先度</label>
+      <div style={{ marginTop: 8, display: 'flex', gap: 8, alignItems: 'center' }}>
+        <span style={{ fontSize: 12, color: '#555' }}>優先度:</span>
         <button onClick={onCycle} aria-label="優先度を切替" style={{ padding: '6px 10px' }}>
           {value ?? '未設定'}
         </button>
@@ -71,3 +128,23 @@ function TicketItem({ ticket, value, onCycle }: { ticket: TriageTicket; value?: 
   )
 }
 
+function DropColumn({ title, children, onDrop, onDragOver, hint }: { title: string; children: React.ReactNode; onDrop: (e: React.DragEvent) => void; onDragOver: (e: React.DragEvent) => void; hint?: string }) {
+  return (
+    <div
+      onDrop={onDrop}
+      onDragOver={onDragOver}
+      aria-dropeffect="move"
+      style={{
+        minHeight: 120,
+        background: '#f9fafb',
+        border: '2px dashed #e1e4e8',
+        borderRadius: 8,
+        padding: 8,
+      }}
+    >
+      <div style={{ fontWeight: 600, marginBottom: 6 }}>{title}</div>
+      {hint && <div style={{ fontSize: 12, color: '#888', marginBottom: 6 }}>{hint}</div>}
+      <div style={{ display: 'grid', gap: 8 }}>{children}</div>
+    </div>
+  )
+}
